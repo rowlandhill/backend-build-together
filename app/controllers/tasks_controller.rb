@@ -1,15 +1,17 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:show, :update, :destroy]
-  before_action :authenticate, only: [:create, :update, :destroy]
+  # before_action :authenticate, only: [:create, :update, :destroy]
+  before_action :validate_user
   # GET /tasks
   def index
-    @tasks = Task.all
+    @tasks = Task.where 'user_id= ?', @current_user.id
 
     render json: @tasks
   end
 
   # GET /tasks/1
   def show
+    @task = Task.find(params[:id])
     render json: @task
   end
 
@@ -43,7 +45,14 @@ class TasksController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_task
       # @task = Task.find(params[:id])
+      # require 'pry'
+      # binding.pry
+      validate_user
       @task = current_user.tasks.find(params[:id])
+    end
+
+    def validate_user
+      set_current_user
     end
 
     # Only allow a trusted parameter "white list" through.
